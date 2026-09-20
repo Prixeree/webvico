@@ -1,6 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { RotateCcw, Sliders } from 'lucide-react';
 import { useGradeStore } from '../store/gradeStore';
 import { DEFAULT_GRADE_PARAMS } from '../lib/ai/types';
 
@@ -9,7 +7,6 @@ export const GradingPanel: React.FC = () => {
   const setParam = useGradeStore((s) => s.setParam);
   const resetParams = useGradeStore((s) => s.resetParams);
 
-  // Helper for single slider
   const renderSlider = (
     label: string,
     value: number,
@@ -19,22 +16,18 @@ export const GradingPanel: React.FC = () => {
     onChange: (val: number) => void,
     onReset: () => void,
     formatVal: (val: number) => string,
-    trackStyle?: string
+    sliderType: 'cool' | 'warm' | 'neutral' = 'neutral'
   ) => (
-    <motion.div
-      whileHover={{ scale: 1.01 }}
-      transition={{ duration: 0.1 }}
-      className="flex flex-col gap-1.5 py-1"
-    >
+    <div className="flex flex-col gap-1 py-0.5">
       <div className="flex items-center justify-between text-xs">
         <label
           onDoubleClick={onReset}
-          className="text-zinc-300 font-medium cursor-pointer hover:text-cyan-400 select-none transition-colors"
+          className="text-zinc-300 font-normal cursor-pointer hover:text-[#E8E6E1] select-none"
           title="Double-click to reset"
         >
           {label}
         </label>
-        <span className="font-mono text-[11px] text-cyan-300 min-w-[50px] text-right">
+        <span className="font-mono tabular-nums text-[11px] text-[#E8E6E1]">
           {formatVal(value)}
         </span>
       </div>
@@ -45,31 +38,35 @@ export const GradingPanel: React.FC = () => {
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className={`w-full h-1 bg-zinc-800 rounded appearance-none cursor-pointer accent-cyan-400 ${trackStyle || ''}`}
+        className={`w-full ${
+          sliderType === 'cool'
+            ? 'slider-cool'
+            : sliderType === 'warm'
+            ? 'slider-warm'
+            : ''
+        }`}
       />
-    </motion.div>
+    </div>
   );
 
   return (
-    <div className="flex flex-col gap-5 p-4 bg-zinc-900/60 border border-zinc-800/80 rounded-lg">
-      <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
-        <div className="flex items-center gap-2 text-zinc-200">
-          <Sliders className="w-3.5 h-3.5 text-cyan-400" />
-          <h3 className="text-xs font-semibold uppercase tracking-wider">Manual Grade</h3>
-        </div>
+    <div className="flex flex-col gap-4 p-3 bg-[#1C1E24] border border-white/[0.08] rounded-[2px]">
+      <div className="flex items-center justify-between border-b border-white/[0.08] pb-2">
+        <span className="text-xs font-medium text-zinc-300 uppercase tracking-wider">
+          Color Adjustments
+        </span>
         <button
           onClick={resetParams}
-          className="inline-flex items-center gap-1 text-[11px] text-zinc-400 hover:text-red-400 transition-colors"
+          className="text-[11px] text-zinc-400 hover:text-[#E8E6E1] transition-colors"
           title="Reset all manual parameters"
         >
-          <RotateCcw className="w-3 h-3" />
-          <span>Reset</span>
+          Reset
         </button>
       </div>
 
       {/* Primary Corrections */}
-      <div className="flex flex-col gap-3">
-        <span className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider">
+      <div className="flex flex-col gap-2">
+        <span className="text-[10px] font-mono text-zinc-500 uppercase">
           Primary
         </span>
 
@@ -81,7 +78,8 @@ export const GradingPanel: React.FC = () => {
           0.02,
           (v) => setParam('exposure', v),
           () => setParam('exposure', DEFAULT_GRADE_PARAMS.exposure),
-          (v) => `${v >= 0 ? '+' : ''}${(v * 2.0).toFixed(2)} EV`
+          (v) => `${v >= 0 ? '+' : ''}${(v * 2.0).toFixed(2)} EV`,
+          params.exposure >= 0 ? 'warm' : 'cool'
         )}
 
         {renderSlider(
@@ -92,7 +90,8 @@ export const GradingPanel: React.FC = () => {
           0.02,
           (v) => setParam('contrast', v),
           () => setParam('contrast', DEFAULT_GRADE_PARAMS.contrast),
-          (v) => (v + 1.0).toFixed(2)
+          (v) => (v + 1.0).toFixed(2),
+          'neutral'
         )}
 
         {renderSlider(
@@ -103,14 +102,15 @@ export const GradingPanel: React.FC = () => {
           0.02,
           (v) => setParam('saturation', v),
           () => setParam('saturation', DEFAULT_GRADE_PARAMS.saturation),
-          (v) => `${Math.round((v + 1.0) * 100)}%`
+          (v) => `${Math.round((v + 1.0) * 100)}%`,
+          'neutral'
         )}
       </div>
 
       {/* White Balance */}
-      <div className="flex flex-col gap-3 pt-2 border-t border-zinc-800/40">
-        <span className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider">
-          White Balance
+      <div className="flex flex-col gap-2 pt-2 border-t border-white/[0.08]">
+        <span className="text-[10px] font-mono text-zinc-500 uppercase">
+          Balance
         </span>
 
         {renderSlider(
@@ -122,7 +122,7 @@ export const GradingPanel: React.FC = () => {
           (v) => setParam('temperature', v),
           () => setParam('temperature', DEFAULT_GRADE_PARAMS.temperature),
           (v) => (v > 0 ? `+${v.toFixed(2)}` : v.toFixed(2)),
-          'accent-amber-400'
+          params.temperature >= 0 ? 'warm' : 'cool'
         )}
 
         {renderSlider(
@@ -134,23 +134,24 @@ export const GradingPanel: React.FC = () => {
           (v) => setParam('tint', v),
           () => setParam('tint', DEFAULT_GRADE_PARAMS.tint),
           (v) => (v > 0 ? `+${v.toFixed(2)}` : v.toFixed(2)),
-          'accent-fuchsia-400'
+          params.tint >= 0 ? 'warm' : 'cool'
         )}
       </div>
 
-      {/* Split Toning: Shadows RGB */}
-      <div className="flex flex-col gap-2 pt-2 border-t border-zinc-800/40">
-        <span className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider">
-          Shadows Tint (RGB)
-        </span>
+      {/* Shadows RGB (Cool Accent: #5FB3A8) */}
+      <div className="flex flex-col gap-1.5 pt-2 border-t border-white/[0.08]">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-mono text-zinc-500 uppercase">
+            Shadows Tint (Cool)
+          </span>
+          <span className="w-2 h-2 rounded-[1px] bg-[#5FB3A8]" title="Cool channel" />
+        </div>
         <div className="grid grid-cols-3 gap-2">
           {['R', 'G', 'B'].map((ch, i) => (
             <div key={`shadow-${ch}`} className="flex flex-col gap-1">
-              <div className="flex justify-between text-[10px] font-mono">
-                <span className={i === 0 ? 'text-rose-400' : i === 1 ? 'text-emerald-400' : 'text-blue-400'}>
-                  {ch}
-                </span>
-                <span className="text-zinc-400">{params.shadows_rgb[i].toFixed(2)}</span>
+              <div className="flex justify-between text-[10px] font-mono tabular-nums">
+                <span className="text-zinc-400">{ch}</span>
+                <span className="text-[#5FB3A8]">{params.shadows_rgb[i].toFixed(2)}</span>
               </div>
               <input
                 type="range"
@@ -163,26 +164,27 @@ export const GradingPanel: React.FC = () => {
                   updated[i] = parseFloat(e.target.value);
                   setParam('shadows_rgb', updated);
                 }}
-                className="w-full h-1 bg-zinc-800 rounded appearance-none cursor-pointer accent-zinc-300"
+                className="w-full slider-cool"
               />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Split Toning: Highlights RGB */}
-      <div className="flex flex-col gap-2 pt-2 border-t border-zinc-800/40">
-        <span className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider">
-          Highlights Tint (RGB)
-        </span>
+      {/* Highlights RGB (Warm Accent: #D9822B) */}
+      <div className="flex flex-col gap-1.5 pt-2 border-t border-white/[0.08]">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-mono text-zinc-500 uppercase">
+            Highlights Tint (Warm)
+          </span>
+          <span className="w-2 h-2 rounded-[1px] bg-[#D9822B]" title="Warm channel" />
+        </div>
         <div className="grid grid-cols-3 gap-2">
           {['R', 'G', 'B'].map((ch, i) => (
             <div key={`highlight-${ch}`} className="flex flex-col gap-1">
-              <div className="flex justify-between text-[10px] font-mono">
-                <span className={i === 0 ? 'text-rose-400' : i === 1 ? 'text-emerald-400' : 'text-blue-400'}>
-                  {ch}
-                </span>
-                <span className="text-zinc-400">{params.highlights_rgb[i].toFixed(2)}</span>
+              <div className="flex justify-between text-[10px] font-mono tabular-nums">
+                <span className="text-zinc-400">{ch}</span>
+                <span className="text-[#D9822B]">{params.highlights_rgb[i].toFixed(2)}</span>
               </div>
               <input
                 type="range"
@@ -195,7 +197,7 @@ export const GradingPanel: React.FC = () => {
                   updated[i] = parseFloat(e.target.value);
                   setParam('highlights_rgb', updated);
                 }}
-                className="w-full h-1 bg-zinc-800 rounded appearance-none cursor-pointer accent-zinc-300"
+                className="w-full slider-warm"
               />
             </div>
           ))}

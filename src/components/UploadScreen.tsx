@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, Sparkles } from 'lucide-react';
 import { useGradeStore } from '../store/gradeStore';
 
 interface UploadScreenProps {
@@ -30,45 +29,41 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({ onLoadSample }) => {
   });
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full p-8 text-center select-none">
+    <div className="flex flex-col items-center justify-center h-full w-full p-8 text-center select-none bg-[#15161A]">
       <div
         {...getRootProps()}
-        className={`w-full max-w-xl p-12 border-2 border-dashed rounded-xl transition-all duration-200 cursor-pointer flex flex-col items-center gap-4 ${
+        className={`w-full max-w-md p-10 border transition-colors cursor-pointer flex flex-col items-center gap-3 rounded-[2px] ${
           isDragActive
-            ? 'border-cyan-400 bg-cyan-950/20 shadow-[0_0_30px_rgba(0,242,254,0.15)]'
-            : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 hover:bg-zinc-900/80'
+            ? 'border-[#5FB3A8] bg-[#5FB3A8]/5'
+            : 'border-white/[0.08] bg-[#1C1E24] hover:border-white/[0.15]'
         }`}
       >
         <input {...getInputProps()} />
-        <div className="w-16 h-16 rounded-2xl bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center text-cyan-400 shadow-lg">
-          <Upload className="w-8 h-8" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-zinc-100 tracking-tight">
-            Drop your video footage here
+        <div className="flex flex-col items-center gap-1">
+          <h2 className="text-sm font-medium text-[#E8E6E1]">
+            Drop video footage here
           </h2>
-          <p className="text-sm text-zinc-400 mt-1">
-            Supports MP4, WebM, MOV & OGG (processed 100% locally in browser)
+          <p className="text-xs text-zinc-400">
+            MP4, WebM, MOV or OGG
           </p>
         </div>
         <button
           type="button"
-          className="mt-2 px-4 py-2 text-xs font-medium text-zinc-200 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-md transition-colors"
+          className="mt-2 px-3 py-1.5 text-xs text-zinc-300 bg-[#15161A] border border-white/[0.08] rounded-[2px] hover:text-[#E8E6E1] hover:border-white/[0.15] transition-colors"
         >
           Select Video File
         </button>
       </div>
 
-      <div className="mt-8 flex items-center gap-4">
-        <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">or</span>
+      <div className="mt-6 flex items-center gap-3">
+        <span className="text-[11px] font-mono text-zinc-500">OR</span>
       </div>
 
       <button
         onClick={onLoadSample}
-        className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 text-xs font-medium text-cyan-300 bg-cyan-950/40 hover:bg-cyan-900/50 border border-cyan-800/50 rounded-lg transition-all shadow-sm"
+        className="mt-3 px-3 py-1.5 text-xs text-[#5FB3A8] bg-[#5FB3A8]/10 border border-[#5FB3A8]/30 rounded-[2px] hover:bg-[#5FB3A8]/20 transition-colors cursor-pointer"
       >
-        <Sparkles className="w-4 h-4 text-cyan-400" />
-        <span>Load Synthetic Test Footage (Macbeth Chart & Gradients)</span>
+        Load Test Footage (Macbeth Chart & Gradients)
       </button>
     </div>
   );

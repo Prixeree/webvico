@@ -1,5 +1,4 @@
 import React from 'react';
-import { Columns, Eye } from 'lucide-react';
 import { useGradeStore } from '../store/gradeStore';
 
 export const BeforeAfterToggle: React.FC = () => {
@@ -11,37 +10,35 @@ export const BeforeAfterToggle: React.FC = () => {
   const isSplitActive = splitX >= 0;
 
   return (
-    <div className="flex items-center gap-2">
-      {/* Split Screen Toggle */}
+    <div className="flex items-center gap-1.5">
+      {/* Split Screen Toggle (Teal Accent) */}
       <button
         onClick={() => setSplitX(isSplitActive ? -1.0 : 0.5)}
-        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-all ${
+        className={`px-2.5 py-1 text-xs font-normal rounded-[2px] border transition-colors cursor-pointer ${
           isSplitActive
-            ? 'bg-cyan-950/50 text-cyan-300 border-cyan-700 shadow-[0_0_10px_rgba(0,242,254,0.2)]'
-            : 'bg-zinc-800/80 text-zinc-400 border-zinc-700 hover:text-zinc-200 hover:bg-zinc-700/80'
+            ? 'bg-[#5FB3A8]/15 text-[#5FB3A8] border-[#5FB3A8]/50'
+            : 'bg-[#15161A] text-zinc-400 border-white/[0.08] hover:text-[#E8E6E1] hover:border-white/[0.15]'
         }`}
-        title="Toggle split-screen before/after comparison"
+        title="Toggle split-screen comparison"
       >
-        <Columns className="w-3.5 h-3.5" />
-        <span>Split View</span>
+        Split
       </button>
 
-      {/* Hold to Compare Button */}
+      {/* Hold to Compare Button (Amber Accent) */}
       <button
         onMouseDown={() => setShowOriginal(true)}
         onMouseUp={() => setShowOriginal(false)}
         onMouseLeave={() => setShowOriginal(false)}
         onTouchStart={() => setShowOriginal(true)}
         onTouchEnd={() => setShowOriginal(false)}
-        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-all ${
+        className={`px-2.5 py-1 text-xs font-normal rounded-[2px] border transition-colors cursor-pointer ${
           showOriginal
-            ? 'bg-amber-950/50 text-amber-300 border-amber-700 shadow-[0_0_10px_rgba(246,173,85,0.2)]'
-            : 'bg-zinc-800/80 text-zinc-400 border-zinc-700 hover:text-zinc-200 hover:bg-zinc-700/80'
+            ? 'bg-[#D9822B]/15 text-[#D9822B] border-[#D9822B]/50'
+            : 'bg-[#15161A] text-zinc-400 border-white/[0.08] hover:text-[#E8E6E1] hover:border-white/[0.15]'
         }`}
-        title="Press and hold to preview original un-graded footage"
+        title="Hold to view original footage"
       >
-        <Eye className="w-3.5 h-3.5" />
-        <span>Hold Compare</span>
+        Compare
       </button>
     </div>
   );

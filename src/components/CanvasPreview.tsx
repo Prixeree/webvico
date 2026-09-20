@@ -11,6 +11,7 @@ interface CanvasPreviewProps {
 
 export const CanvasPreview: React.FC<CanvasPreviewProps> = ({ isSampleMode, onResetToUpload }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const fadeCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const rendererRef = useRef<WebGLRenderer | null>(null);
   const sampleGenRef = useRef<SampleVideoGenerator | null>(null);
@@ -22,6 +23,7 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({ isSampleMode, onRe
   const [isLooping, setIsLooping] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [isDraggingSplit, setIsDraggingSplit] = useState(false);
+  const [fadeOpacity, setFadeOpacity] = useState<number>(0);
 
   // Store subscriptions
   const params = useGradeStore((s) => s.params);
@@ -31,6 +33,8 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({ isSampleMode, onRe
   const showOriginal = useGradeStore((s) => s.showOriginal);
   const setVideoElement = useGradeStore((s) => s.setVideoElement);
   const setSplitX = useGradeStore((s) => s.setSplitX);
+
+  const prevLutRef = useRef(activeLut);
 
   // Initialize WebGL Renderer
   useEffect(() => {
@@ -54,9 +58,32 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({ isSampleMode, onRe
     };
   }, []);
 
-  // Update LUT in renderer when changed
+  // Deliberate motion moment: Smooth crossfade on the canvas when LUT changes
   useEffect(() => {
     if (!rendererRef.current) return;
+
+    // If activeLut has changed and canvas exists, perform crossfade
+    if (canvasRef.current && fadeCanvasRef.current && prevLutRef.current !== activeLut) {
+      const mainCanvas = canvasRef.current;
+      const fadeCanvas = fadeCanvasRef.current;
+
+      // Copy current frame to fade canvas
+      fadeCanvas.width = mainCanvas.width;
+      fadeCanvas.height = mainCanvas.height;
+      const ctx = fadeCanvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(mainCanvas, 0, 0);
+        setFadeOpacity(1);
+
+        // Transition opacity from 1 to 0
+        requestAnimationFrame(() => {
+          setFadeOpacity(0);
+        });
+      }
+    }
+
+    prevLutRef.current = activeLut;
+
     if (activeLut) {
       rendererRef.current.setLut(activeLut.size, activeLut.data);
     } else {
@@ -221,7 +248,7 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({ isSampleMode, onRe
   };
 
   return (
-    <div className="relative flex-1 flex flex-col h-full bg-zinc-950 overflow-hidden select-none">
+    <div className="relative flex-1 flex flex-col h-full bg-[#15161A] overflow-hidden select-none">
       {/* Hidden Video Source Element */}
       <video
         ref={videoRef}
@@ -234,10 +261,20 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({ isSampleMode, onRe
       />
 
       {/* Centerpiece Canvas Viewport */}
-      <div className="relative flex-1 flex items-center justify-center p-4 overflow-hidden bg-radial from-zinc-900 to-zinc-950">
+      <div className="relative flex-1 flex items-center justify-center p-4 overflow-hidden bg-[#15161A]">
         <canvas
           ref={canvasRef}
-          className="max-h-full max-w-full rounded shadow-2xl object-contain"
+          className="max-h-full max-w-full rounded-[2px] object-contain border border-white/[0.04]"
+        />
+
+        {/* Crossfade Overlay Canvas for smooth LUT transition */}
+        <canvas
+          ref={fadeCanvasRef}
+          style={{
+            opacity: fadeOpacity,
+            transition: 'opacity 350ms cubic-bezier(0.16, 1, 0.3, 1)'
+          }}
+          className="absolute max-h-full max-w-full rounded-[2px] object-contain pointer-events-none"
         />
 
         {/* Draggable Split Divider Line */}
@@ -247,8 +284,8 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({ isSampleMode, onRe
             style={{ left: `${splitX * 100}%` }}
             className="absolute top-4 bottom-4 w-6 -ml-3 cursor-ew-resize flex items-center justify-center z-30 group"
           >
-            <div className="h-full w-0.5 bg-white shadow-[0_0_10px_rgba(0,242,254,0.8)] group-hover:bg-cyan-300" />
-            <div className="absolute w-6 h-6 rounded-full bg-zinc-900 border-2 border-white text-[9px] font-mono font-bold flex items-center justify-center text-white shadow-lg group-hover:scale-110 group-hover:border-cyan-400 group-hover:text-cyan-300 transition-transform">
+            <div className="h-full w-px bg-white group-hover:bg-[#5FB3A8]" />
+            <div className="absolute w-5 h-5 rounded-[2px] bg-[#1C1E24] border border-white/[0.2] text-[9px] font-mono font-medium flex items-center justify-center text-[#E8E6E1]">
               VS
             </div>
           </div>
@@ -257,10 +294,10 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({ isSampleMode, onRe
         {/* Before / After Badges */}
         {splitX >= 0 && (
           <>
-            <div className="absolute top-6 left-6 px-2.5 py-1 text-[10px] font-mono font-bold tracking-wider text-zinc-400 bg-zinc-900/80 border border-zinc-800 rounded backdrop-blur pointer-events-none">
+            <div className="absolute top-6 left-6 px-2 py-0.5 text-[10px] font-mono tracking-wider text-zinc-400 bg-[#1C1E24] border border-white/[0.08] rounded-[2px] pointer-events-none">
               BEFORE
             </div>
-            <div className="absolute top-6 right-6 px-2.5 py-1 text-[10px] font-mono font-bold tracking-wider text-cyan-300 bg-zinc-900/80 border border-cyan-800/60 rounded backdrop-blur pointer-events-none shadow-[0_0_12px_rgba(0,242,254,0.2)]">
+            <div className="absolute top-6 right-6 px-2 py-0.5 text-[10px] font-mono tracking-wider text-[#5FB3A8] bg-[#1C1E24] border border-[#5FB3A8]/40 rounded-[2px] pointer-events-none">
               AFTER
             </div>
           </>
@@ -268,21 +305,21 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({ isSampleMode, onRe
 
         {/* Hold-to-compare overlay badge */}
         {showOriginal && (
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 px-3 py-1 text-[11px] font-mono font-bold tracking-widest text-amber-300 bg-zinc-900/90 border border-amber-500/50 rounded-full backdrop-blur shadow-lg">
-            ORIGINAL (HOLD TO COMPARE)
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 px-3 py-1 text-[11px] font-mono text-[#D9822B] bg-[#1C1E24] border border-[#D9822B]/50 rounded-[2px]">
+            ORIGINAL FOOTAGE (HOLD)
           </div>
         )}
       </div>
 
       {/* Playback Controls Toolbar */}
-      <div className="h-12 bg-zinc-900/90 border-t border-zinc-800/80 px-4 flex items-center justify-between gap-4 z-20">
-        <div className="flex items-center gap-3">
+      <div className="h-10 bg-[#1C1E24] border-t border-white/[0.08] px-3 flex items-center justify-between gap-3 z-20">
+        <div className="flex items-center gap-2">
           <button
             onClick={togglePlay}
-            className="w-8 h-8 rounded flex items-center justify-center text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="w-7 h-7 rounded-[2px] flex items-center justify-center text-zinc-400 hover:text-[#E8E6E1] hover:bg-white/[0.04] transition-colors"
             title="Play / Pause (Space)"
           >
-            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
           </button>
 
           <button
@@ -290,13 +327,13 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({ isSampleMode, onRe
               if (isSampleMode && sampleGenRef.current) sampleGenRef.current.seek(0);
               else if (videoRef.current) videoRef.current.currentTime = 0;
             }}
-            className="w-8 h-8 rounded flex items-center justify-center text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
-            title="Rewind to start"
+            className="w-7 h-7 rounded-[2px] flex items-center justify-center text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04] transition-colors"
+            title="Rewind"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-3 h-3" />
           </button>
 
-          <span className="font-mono text-xs text-zinc-400 min-w-[85px]">
+          <span className="font-mono tabular-nums text-[11px] text-zinc-400 min-w-[75px]">
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
         </div>
@@ -310,27 +347,27 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({ isSampleMode, onRe
             step={0.01}
             value={duration > 0 ? (currentTime / duration) * 100 : 0}
             onChange={handleSeek}
-            className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+            className="w-full"
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => setIsMuted(!isMuted)}
-            className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
-              isMuted ? 'text-amber-400' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
+            className={`w-7 h-7 rounded-[2px] flex items-center justify-center transition-colors ${
+              isMuted ? 'text-[#D9822B]' : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]'
             }`}
             title={isMuted ? 'Unmute' : 'Mute'}
           >
-            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
           </button>
 
           <button
             onClick={() => setIsLooping(!isLooping)}
-            className={`px-2 py-1 text-[11px] font-mono rounded border transition-colors ${
+            className={`px-1.5 py-0.5 text-[10px] font-mono rounded-[2px] border transition-colors ${
               isLooping
-                ? 'text-cyan-300 border-cyan-800 bg-cyan-950/40'
-                : 'text-zinc-500 border-zinc-800 hover:text-zinc-300'
+                ? 'text-[#5FB3A8] border-[#5FB3A8]/40 bg-[#5FB3A8]/10'
+                : 'text-zinc-500 border-white/[0.08] hover:text-zinc-300'
             }`}
             title="Toggle Loop"
           >
@@ -339,10 +376,10 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({ isSampleMode, onRe
 
           <button
             onClick={onResetToUpload}
-            className="text-xs text-zinc-400 hover:text-zinc-200 px-2 py-1 rounded hover:bg-zinc-800 transition-colors"
+            className="text-[11px] text-zinc-400 hover:text-[#E8E6E1] px-2 py-1 rounded-[2px] hover:bg-white/[0.04] transition-colors"
             title="Switch Footage"
           >
-            Change Video
+            Change
           </button>
         </div>
       </div>

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Palette, Check } from 'lucide-react';
 import { useGradeStore } from '../store/gradeStore';
 import { parseCubeFile } from '../lib/lut/parseCubeFile';
 
@@ -7,14 +6,15 @@ interface Preset {
   id: string;
   name: string;
   url: string;
+  type: 'neutral' | 'warm' | 'cool';
 }
 
 const PRESETS: Preset[] = [
-  { id: 'neutral', name: 'None / Neutral', url: './luts/identity.cube' },
-  { id: 'warm_film', name: 'Warm Film', url: './luts/warm_film.cube' },
-  { id: 'teal_orange', name: 'Teal & Orange', url: './luts/teal_orange.cube' },
-  { id: 'black_white', name: 'Black & White', url: './luts/black_white.cube' },
-  { id: 'bleach_bypass', name: 'Bleach Bypass', url: './luts/bleach_bypass.cube' }
+  { id: 'neutral', name: 'None / Neutral', url: './luts/identity.cube', type: 'neutral' },
+  { id: 'warm_film', name: 'Warm Film', url: './luts/warm_film.cube', type: 'warm' },
+  { id: 'teal_orange', name: 'Teal & Orange', url: './luts/teal_orange.cube', type: 'cool' },
+  { id: 'black_white', name: 'Black & White', url: './luts/black_white.cube', type: 'neutral' },
+  { id: 'bleach_bypass', name: 'Bleach Bypass', url: './luts/bleach_bypass.cube', type: 'cool' }
 ];
 
 export const LutPresetPicker: React.FC = () => {
@@ -45,7 +45,6 @@ export const LutPresetPicker: React.FC = () => {
         size: parsed.size,
         data: parsed.data
       });
-      // Per spec: Selecting one sets the 3D LUT texture and resets manual sliders to neutral
       resetParams();
     } catch (err) {
       console.error('Failed to load LUT preset:', err);
@@ -55,37 +54,42 @@ export const LutPresetPicker: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-3 p-4 bg-zinc-900/60 border border-zinc-800/80 rounded-lg">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-zinc-200">
-          <Palette className="w-3.5 h-3.5 text-cyan-400" />
-          <h3 className="text-xs font-semibold uppercase tracking-wider">LUT Presets</h3>
-        </div>
+    <div className="flex flex-col gap-2.5 p-3 bg-[#1C1E24] border border-white/[0.08] rounded-[2px]">
+      <div className="flex items-center justify-between border-b border-white/[0.08] pb-2">
+        <span className="text-xs font-medium text-zinc-300 uppercase tracking-wider">
+          Presets
+        </span>
         {activeLut && (
-          <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/40 px-2 py-0.5 rounded">
-            {activeLut.name} ({activeLut.size}³)
+          <span className="text-[10px] font-mono text-[#5FB3A8] bg-[#5FB3A8]/10 border border-[#5FB3A8]/30 px-1.5 py-0.2 rounded-[2px]">
+            {activeLut.name}
           </span>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-1.5">
         {PRESETS.map((preset) => {
           const isActive = selectedId === preset.id;
           const isLoading = loadingId === preset.id;
+
+          const accentBorder =
+            preset.type === 'warm'
+              ? 'border-[#D9822B] text-[#D9822B] bg-[#D9822B]/10'
+              : preset.type === 'cool'
+              ? 'border-[#5FB3A8] text-[#5FB3A8] bg-[#5FB3A8]/10'
+              : 'border-[#E8E6E1] text-[#E8E6E1] bg-white/[0.04]';
 
           return (
             <button
               key={preset.id}
               onClick={() => handleSelectPreset(preset)}
               disabled={isLoading}
-              className={`flex items-center justify-between px-3 py-2 text-xs rounded border text-left transition-all ${
+              className={`px-2.5 py-1.5 text-xs rounded-[2px] border text-left transition-colors cursor-pointer ${
                 isActive
-                  ? 'border-cyan-500/80 bg-cyan-950/30 text-cyan-300 shadow-[0_0_10px_rgba(0,242,254,0.1)]'
-                  : 'border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 hover:border-zinc-700'
+                  ? accentBorder
+                  : 'border-white/[0.08] bg-[#15161A] text-zinc-400 hover:text-[#E8E6E1] hover:border-white/[0.15]'
               }`}
             >
-              <span className="truncate">{isLoading ? 'Loading...' : preset.name}</span>
-              {isActive && <Check className="w-3 h-3 text-cyan-400 shrink-0 ml-1" />}
+              <span className="truncate block">{isLoading ? 'Loading...' : preset.name}</span>
             </button>
           );
         })}

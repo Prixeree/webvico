@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Bot, Key, Sparkles, RefreshCw, AlertTriangle } from 'lucide-react';
 import { useGradeStore } from '../store/gradeStore';
 import { AiProvider } from '../lib/ai/types';
 import { ANALYSIS_PROMPT, getRefinementPrompt } from '../lib/ai/prompts';
@@ -27,9 +26,6 @@ export const AiColoristPanel: React.FC<AiColoristPanelProps> = ({ isSampleMode }
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  /**
-   * Extract 3-4 keyframes from video or active canvas.
-   */
   const extractKeyframes = async (count: number = 3): Promise<string[]> => {
     const frames: string[] = [];
     const canvas = document.createElement('canvas');
@@ -39,7 +35,6 @@ export const AiColoristPanel: React.FC<AiColoristPanelProps> = ({ isSampleMode }
     if (!ctx) return [];
 
     if (isSampleMode || !videoElement) {
-      // Capture current viewport canvas
       const mainCanvas = document.querySelector('canvas') as HTMLCanvasElement;
       if (mainCanvas) {
         ctx.drawImage(mainCanvas, 0, 0, canvas.width, canvas.height);
@@ -77,12 +72,9 @@ export const AiColoristPanel: React.FC<AiColoristPanelProps> = ({ isSampleMode }
     return frames;
   };
 
-  /**
-   * Run Auto-Grade with the analysis prompt
-   */
   const handleAutoGrade = async () => {
     if (!apiKey) {
-      setErrorMessage('Please enter your API key first.');
+      setErrorMessage('API key required');
       return;
     }
 
@@ -92,24 +84,20 @@ export const AiColoristPanel: React.FC<AiColoristPanelProps> = ({ isSampleMode }
     try {
       const keyframes = await extractKeyframes(3);
       if (keyframes.length === 0) {
-        throw new Error('Failed to extract footage keyframes.');
+        throw new Error('Failed to extract footage keyframes');
       }
 
       const response = await callAiColorist(aiProvider, apiKey, keyframes, ANALYSIS_PROMPT);
-
       setLastAnalysis(response);
       setParams(response.params);
     } catch (err: any) {
       console.error('Auto-Grade failed:', err);
-      setErrorMessage(err.message || 'Auto-Grade request failed.');
+      setErrorMessage(err.message || 'Auto-Grade failed');
     } finally {
       setIsAiAnalyzing(false);
     }
   };
 
-  /**
-   * Run Refine with the refinement prompt (capped at 2 calls)
-   */
   const handleRefine = async () => {
     if (!apiKey || refineCount >= 2) return;
 
@@ -117,7 +105,6 @@ export const AiColoristPanel: React.FC<AiColoristPanelProps> = ({ isSampleMode }
     setIsAiAnalyzing(true);
 
     try {
-      // Capture currently graded frame from WebGL canvas
       const mainCanvas = document.querySelector('canvas') as HTMLCanvasElement;
       if (!mainCanvas) throw new Error('Canvas not found');
 
@@ -136,30 +123,29 @@ export const AiColoristPanel: React.FC<AiColoristPanelProps> = ({ isSampleMode }
       incrementRefineCount();
     } catch (err: any) {
       console.error('Refine failed:', err);
-      setErrorMessage(err.message || 'Refinement request failed.');
+      setErrorMessage(err.message || 'Refinement failed');
     } finally {
       setIsAiAnalyzing(false);
     }
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-zinc-900/60 border border-zinc-800/80 rounded-lg">
-      <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
-        <div className="flex items-center gap-2 text-zinc-200">
-          <Bot className="w-4 h-4 text-cyan-400" />
-          <h3 className="text-xs font-semibold uppercase tracking-wider">AI Colorist Agent</h3>
-        </div>
-        <span className="text-[10px] font-mono text-zinc-500">BYOK (Session Only)</span>
+    <div className="flex flex-col gap-3 p-3 bg-[#1C1E24] border border-white/[0.08] rounded-[2px]">
+      <div className="flex items-center justify-between border-b border-white/[0.08] pb-2">
+        <span className="text-xs font-medium text-zinc-300 uppercase tracking-wider">
+          AI Colorist
+        </span>
+        <span className="text-[10px] font-mono text-zinc-500">Session Key</span>
       </div>
 
       {/* Provider & Key Configuration */}
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <label className="text-[11px] text-zinc-400 w-16">Provider:</label>
+          <label className="text-[11px] text-zinc-400 w-14">Provider</label>
           <select
             value={aiProvider}
             onChange={(e) => setAiProvider(e.target.value as AiProvider)}
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-cyan-400"
+            className="flex-1 bg-[#15161A] border border-white/[0.08] rounded-[2px] px-2 py-1 text-xs text-[#E8E6E1] focus:outline-none focus:border-[#5FB3A8]"
           >
             <option value="anthropic">Anthropic (Claude 3.5 Sonnet)</option>
             <option value="openai">OpenAI (GPT-4o)</option>
@@ -168,69 +154,63 @@ export const AiColoristPanel: React.FC<AiColoristPanelProps> = ({ isSampleMode }
         </div>
 
         <div className="flex items-center gap-2">
-          <label className="text-[11px] text-zinc-400 w-16 flex items-center gap-1">
-            <Key className="w-3 h-3 text-zinc-500" />
-            <span>Key:</span>
-          </label>
+          <label className="text-[11px] text-zinc-400 w-14">API Key</label>
           <input
             type="password"
-            placeholder="Paste your API key..."
+            placeholder="Paste key..."
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-xs font-mono text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-cyan-400"
+            className="flex-1 bg-[#15161A] border border-white/[0.08] rounded-[2px] px-2 py-1 text-xs font-mono text-[#E8E6E1] placeholder:text-zinc-600 focus:outline-none focus:border-[#5FB3A8]"
           />
         </div>
       </div>
 
       {errorMessage && (
-        <div className="flex items-start gap-2 p-2 bg-rose-950/30 border border-rose-800/40 rounded text-rose-300 text-xs">
-          <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
-          <span className="break-all">{errorMessage}</span>
+        <div className="p-2 bg-rose-950/20 border border-rose-800/40 rounded-[2px] text-rose-300 text-xs font-mono">
+          {errorMessage}
         </div>
       )}
 
       {/* AI Analysis Display Card */}
       {lastAnalysis && (
-        <div className="flex flex-col gap-2 p-3 bg-zinc-950/60 border border-cyan-900/40 rounded-lg shadow-inner">
+        <div className="flex flex-col gap-1.5 p-2.5 bg-[#15161A] border border-white/[0.08] rounded-[2px]">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono font-bold text-cyan-400 tracking-wider uppercase">
-              LOOK: {lastAnalysis.look_name}
+            <span className="text-[11px] font-mono font-medium text-[#5FB3A8]">
+              {lastAnalysis.look_name}
             </span>
             {refineCount > 0 && (
               <span className="text-[10px] font-mono text-zinc-500">
-                Refined ({refineCount}/2)
+                Refine {refineCount}/2
               </span>
             )}
           </div>
-          <p className="text-xs text-zinc-300 leading-relaxed italic">
-            "{lastAnalysis.mood_analysis}"
+          <p className="text-xs text-zinc-300 leading-normal">
+            {lastAnalysis.mood_analysis}
           </p>
-          <p className="text-[11px] text-zinc-400 leading-normal border-t border-zinc-800/60 pt-1.5">
-            <strong className="text-zinc-300">Reasoning:</strong> {lastAnalysis.reasoning}
+          <p className="text-[11px] text-zinc-400 border-t border-white/[0.08] pt-1 mt-0.5">
+            {lastAnalysis.reasoning}
           </p>
         </div>
       )}
 
-      {/* Action Buttons */}
+      {/* Action Buttons: Teal for Auto-Grade, Amber for Refine */}
       <div className="flex items-center gap-2">
         <button
           onClick={handleAutoGrade}
           disabled={isAiAnalyzing}
-          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold text-zinc-950 bg-cyan-400 hover:bg-cyan-300 disabled:opacity-50 disabled:cursor-not-allowed rounded shadow-[0_0_15px_rgba(0,242,254,0.3)] transition-all"
+          className="flex-1 py-1.5 px-2.5 text-xs font-medium text-[#15161A] bg-[#5FB3A8] hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed rounded-[2px] transition-all cursor-pointer"
         >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>{isAiAnalyzing ? 'Analyzing Footage...' : 'Auto-Grade'}</span>
+          {isAiAnalyzing ? 'Analyzing...' : 'Auto-Grade'}
         </button>
 
         {lastAnalysis && (
           <button
             onClick={handleRefine}
             disabled={isAiAnalyzing || refineCount >= 2}
-            className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-medium text-zinc-200 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed border border-zinc-700 rounded transition-colors"
-            title={refineCount >= 2 ? 'Refinement limit reached (2 max)' : 'Refine current color grade'}
+            className="py-1.5 px-2.5 text-xs font-medium text-[#D9822B] bg-[#D9822B]/10 hover:bg-[#D9822B]/20 disabled:opacity-40 disabled:cursor-not-allowed border border-[#D9822B]/40 rounded-[2px] transition-colors cursor-pointer"
+            title={refineCount >= 2 ? 'Refine limit reached' : 'Refine current color grade'}
           >
-            <RefreshCw className={`w-3 h-3 ${isAiAnalyzing ? 'animate-spin' : ''}`} />
-            <span>Refine ({2 - refineCount})</span>
+            Refine ({2 - refineCount})
           </button>
         )}
       </div>

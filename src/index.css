@@ -1,24 +1,39 @@
 @import "tailwindcss";
 
+:root {
+  --bg-canvas: #15161A;
+  --bg-panel: #1C1E24;
+  --text-primary: #E8E6E1;
+  --accent-cool: #5FB3A8;
+  --accent-warm: #D9822B;
+  --border-hairline: rgba(255, 255, 255, 0.08);
+}
+
 @layer base {
   * {
     box-sizing: border-box;
+    border-color: rgba(255, 255, 255, 0.08);
   }
 
   body {
-    background-color: #090a0f;
-    color: #f4f4f5;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #15161A;
+    color: #E8E6E1;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     user-select: none;
     -webkit-font-smoothing: antialiased;
     overflow: hidden;
   }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
 }
 
-/* Custom scrollbars */
+/* Custom hairline scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -26,36 +41,45 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 242, 254, 0.3);
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* Range input styling */
+/* Precision Flat Sliders */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  background: #27272a;
-  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  height: 3px;
+  border-radius: 1px;
   outline: none;
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #f4f4f5;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: #E8E6E1;
   cursor: pointer;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
-  transition: transform 0.1s ease, background-color 0.1s ease;
+  transition: background-color 0.1s ease;
+}
+
+/* Cool-side slider thumb (Teal) */
+input[type="range"].slider-cool::-webkit-slider-thumb {
+  background: #5FB3A8;
+}
+
+/* Warm-side slider thumb (Amber) */
+input[type="range"].slider-warm::-webkit-slider-thumb {
+  background: #D9822B;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.25);
-  background: #00f2fe;
+  filter: brightness(1.15);
 }

@@ -1,5 +1,4 @@
 import React, { useRef, useState } from 'react';
-import { UploadCloud, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useGradeStore } from '../store/gradeStore';
 import { parseCubeFile } from '../lib/lut/parseCubeFile';
 
@@ -16,7 +15,7 @@ export const LutUpload: React.FC = () => {
     if (!file) return;
 
     if (!file.name.toLowerCase().endsWith('.cube')) {
-      setStatus({ type: 'error', message: 'Please select a valid .cube 3D LUT file.' });
+      setStatus({ type: 'error', message: 'Invalid file. Expected .cube' });
       return;
     }
 
@@ -33,16 +32,16 @@ export const LutUpload: React.FC = () => {
 
       setStatus({
         type: 'success',
-        message: `Loaded "${file.name}" (${parsed.size}³)`
+        message: `${file.name} (${parsed.size}³)`
       });
     } catch (err: any) {
       console.error('Failed to parse .cube:', err);
-      setStatus({ type: 'error', message: err.message || 'Failed to parse .cube file' });
+      setStatus({ type: 'error', message: err.message || 'Failed to parse' });
     }
   };
 
   return (
-    <div className="flex flex-col gap-2 p-3 bg-zinc-900/40 border border-zinc-800/60 rounded-lg">
+    <div className="flex flex-col gap-1.5 p-2.5 bg-[#1C1E24] border border-white/[0.08] rounded-[2px]">
       <input
         ref={fileInputRef}
         type="file"
@@ -52,24 +51,21 @@ export const LutUpload: React.FC = () => {
       />
       <button
         onClick={() => fileInputRef.current?.click()}
-        className="flex items-center justify-center gap-2 w-full py-2 px-3 text-xs font-medium text-zinc-300 bg-zinc-800/80 hover:bg-zinc-700/80 hover:text-white border border-zinc-700 rounded transition-colors"
+        className="w-full py-1.5 px-2.5 text-xs font-normal text-zinc-300 bg-[#15161A] hover:text-[#E8E6E1] hover:border-white/[0.15] border border-white/[0.08] rounded-[2px] transition-colors cursor-pointer text-center"
       >
-        <UploadCloud className="w-3.5 h-3.5 text-cyan-400" />
-        <span>Import Custom .CUBE LUT</span>
+        Import .CUBE File
       </button>
 
       {status.type === 'success' && (
-        <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-mono">
-          <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-          <span className="truncate">{status.message}</span>
-        </div>
+        <span className="text-[10px] font-mono text-[#5FB3A8] truncate block">
+          {status.message}
+        </span>
       )}
 
       {status.type === 'error' && (
-        <div className="flex items-center gap-1.5 text-[11px] text-rose-400 font-mono">
-          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-          <span className="truncate">{status.message}</span>
-        </div>
+        <span className="text-[10px] font-mono text-rose-400 truncate block">
+          {status.message}
+        </span>
       )}
     </div>
   );

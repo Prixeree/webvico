@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Download, Loader2 } from 'lucide-react';
 import { useGradeStore } from '../store/gradeStore';
 import { CanvasRecorder } from '../lib/export/recordCanvas';
 
@@ -12,12 +11,12 @@ export const ExportButton: React.FC = () => {
   const handleExport = async () => {
     const canvas = document.querySelector('canvas') as HTMLCanvasElement;
     if (!canvas) {
-      alert('Canvas viewport not found.');
+      alert('Canvas viewport not found');
       return;
     }
 
     if (!videoElement) {
-      alert('No video element loaded to export.');
+      alert('No video loaded');
       return;
     }
 
@@ -52,38 +51,35 @@ export const ExportButton: React.FC = () => {
       <button
         onClick={handleExport}
         disabled={isExporting}
-        className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-zinc-950 bg-gradient-to-r from-cyan-400 to-blue-400 hover:from-cyan-300 hover:to-blue-300 disabled:opacity-50 rounded shadow-[0_0_15px_rgba(0,242,254,0.3)] transition-all cursor-pointer"
+        className="px-3 py-1 text-xs font-normal text-[#15161A] bg-[#E8E6E1] hover:brightness-95 disabled:opacity-40 rounded-[2px] border border-white/[0.1] transition-all cursor-pointer"
         title="Export graded video via MediaRecorder"
       >
-        {isExporting ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        ) : (
-          <Download className="w-3.5 h-3.5" />
-        )}
-        <span>{isExporting ? `Exporting ${progress}%` : 'Export Video'}</span>
+        {isExporting ? `Exporting ${progress}%` : 'Export'}
       </button>
 
-      {/* Exporting Modal Overlay */}
+      {/* Exporting Modal */}
       {isExporting && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex flex-col gap-4 shadow-2xl">
+        <div className="fixed inset-0 bg-[#15161A]/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-xs bg-[#1C1E24] border border-white/[0.08] rounded-[2px] p-4 flex flex-col gap-3">
             <div>
-              <h3 className="text-sm font-semibold text-zinc-100">Rendering Video</h3>
-              <p className="text-xs text-zinc-400 mt-1">
-                Encoding canvas stream with audio...
+              <h3 className="text-xs font-medium text-[#E8E6E1] uppercase tracking-wider">
+                Rendering Video
+              </h3>
+              <p className="text-[11px] text-zinc-400 mt-0.5">
+                Recording canvas stream with audio...
               </p>
             </div>
 
-            <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="w-full h-1 bg-[#15161A] rounded-[1px] overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-100"
+                className="h-full bg-[#5FB3A8] transition-all duration-100"
                 style={{ width: `${progress}%` }}
               />
             </div>
 
-            <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+            <div className="flex items-center justify-between text-xs font-mono tabular-nums text-zinc-400">
               <span>Progress</span>
-              <span className="text-cyan-300 font-bold">{progress}%</span>
+              <span className="text-[#5FB3A8]">{progress}%</span>
             </div>
 
             <button
@@ -91,7 +87,7 @@ export const ExportButton: React.FC = () => {
                 recorderInstance.stopRecording();
                 setIsExporting(false);
               }}
-              className="mt-2 py-1.5 px-3 text-xs font-medium text-zinc-400 hover:text-zinc-200 bg-zinc-800 hover:bg-zinc-700 rounded transition-colors"
+              className="py-1 px-2.5 text-xs text-zinc-400 hover:text-[#E8E6E1] bg-[#15161A] border border-white/[0.08] rounded-[2px] transition-colors cursor-pointer"
             >
               Cancel
             </button>
