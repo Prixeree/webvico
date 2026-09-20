@@ -1,0 +1,53 @@
+{
+  "name": "webvico",
+  "version": "1.0.0",
+  "description": "In-browser WebGL2 video color grading tool with 3D .cube LUT parser and BYOK AI colorist agent.",
+  "type": "module",
+  "bin": {
+    "webvico": "./bin/webvico.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "webvico",
+    "color-grader",
+    "lut",
+    "cube",
+    "webgl2",
+    "video-editor",
+    "ai-colorist",
+    "film-grade",
+    "twgl"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "start": "node ./bin/webvico.js",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "framer-motion": "^12.4.7",
+    "lucide-react": "^0.475.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-dropzone": "^14.3.8",
+    "twgl.js": "^5.5.4",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.9",
+    "@types/node": "^22.13.4",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tailwindcss": "^4.0.9",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
+  },
+  "license": "MIT"
+}
