@@ -70,7 +70,7 @@ npm start
 - **📂 Bring Your Own LUT**:
   - Drag and drop or upload any custom `.cube` 3D LUT file to apply it instantly.
 - **🤖 Autonomous AI Colorist Agent (BYOK)**:
-  - Supports **Anthropic** (`claude-3-5-sonnet`), **OpenAI** (`gpt-4o`), and **Google** (`gemini-2.0-flash`) via native browser `fetch()` (zero SDK bloat).
+  - Supports **Anthropic** (`claude-3-5-sonnet`), **OpenAI** (`gpt-4o`), and **Google** (`gemini-2.5-flash`) via native browser `fetch()` (zero SDK bloat).
   - **Auto-Grade**: Extracts 3–4 keyframes across the footage, analyzes lighting/skin tones/genre cues, and automatically sets the grading sliders.
   - **Refine**: Re-analyzes the graded result against professional standards and refines parameters (capped at 2 calls to protect API spend).
   - **100% Privacy**: Keys are stored strictly in `sessionStorage` (cleared on tab close, never sent to any server).
